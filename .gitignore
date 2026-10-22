@@ -1,0 +1,7 @@
+.venv/
+output/
+secrets.txt
+__pycache__/
+.pytest_cache/
+.coverage
+.claude/backup-*/
