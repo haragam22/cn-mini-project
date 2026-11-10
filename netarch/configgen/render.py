@@ -9,6 +9,7 @@ from __future__ import annotations
 import re
 import secrets as _secrets
 from datetime import UTC, datetime
+from functools import cache
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
@@ -22,7 +23,9 @@ from netarch.models.plan import Device, NetworkPlan
 TEMPLATES = {"router": "router.j2", "l3switch": "l3switch.j2", "l2switch": "l2switch.j2"}
 
 
+@cache
 def _env() -> Environment:
+    """One compiled template set per process (recompiling per device was the F6 hot spot)."""
     env = Environment(loader=PackageLoader("netarch.configgen", "templates"),
                       undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True,
                       keep_trailing_newline=True, autoescape=False)

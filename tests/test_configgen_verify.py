@@ -98,7 +98,11 @@ def test_pt_accepted_rows_switch_features_on(plans, monkeypatch):
 def test_profile_name_cannot_inject_config_lines():
     raw = load_preset("campus").model_dump(mode="json")
     raw["profile_name"] = "x\nenable password hacked"
-    p = design(load_requirements(raw))
+    with pytest.raises(Exception, match="pattern"):  # rejected at input (security F10)
+        load_requirements(raw)
+    # defence in depth: the header filter still flattens control characters
+    assert render.ios_text("x\nenable password hacked") == "x?enable password hacked"
+    p = design(load_preset("campus"))
     text = render.render_all(p, "pt", timestamp=FIXED_TS)["dist-bldg-a"]
     assert not re.search(r"^enable password", text, re.M)
 

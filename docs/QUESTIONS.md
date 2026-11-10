@@ -37,3 +37,4 @@ Format: `- [ ] (Phase N) question — why it matters, options` followed by an `*
   **Answer**: Yes: two-tier collapsed core with several access switches (TOP.R2 single block); three-tier only per R3. (user, 2026-10-24)
 - [x] (Phase P2) requested_media handling: os2 is always honoured; om4 is honoured up to 400 m, else ignored with a warning; copper > 100 m → E1 error; a copper request on an inter-building link is overridden to OM4 (X1) with a warning (idea.md: inter-building forces fibre). OK?
   **Answer**: Keep requested_media handling as built. (user, 2026-10-24)
+- [ ] (Security P0–P7, F4 follow-up) A public root such as 8.0.0.0/8 is accepted; §4.1 only requires RFC 1918 for reserved and VPC ranges. Should the root also be restricted to RFC 1918 (error), or allowed with a warning?

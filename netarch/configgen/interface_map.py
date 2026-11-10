@@ -31,10 +31,27 @@ def short(port: str) -> str:
     return port.replace("GigabitEthernet", "Gi").replace("FastEthernet", "Fa")
 
 
-def safe_name(text: str) -> str:
+def safe_name(text: str, limit: int = 40) -> str:
     """IOS-safe token: letters, digits, '-' only (no spaces/newlines reach a config)."""
-    s = re.sub(r"[^A-Za-z0-9-]+", "-", text).strip("-")[:40]
+    s = re.sub(r"[^A-Za-z0-9-]+", "-", text).strip("-")[:limit].strip("-")
     return s or "x"
+
+
+VLAN_NAME_MAX = 32  # IOS `vlan name` limit
+
+
+def vlan_names(segments) -> dict[int, str]:
+    """VLAN id → unique IOS-safe name (≤ 32 chars); clashes get -2, -3 … (security F7/F8)."""
+    out: dict[int, str] = {}
+    used: set[str] = set()
+    for g in segments:
+        base = safe_name(g.name, VLAN_NAME_MAX - 3).upper()
+        name, n = base, 2
+        while name in used:
+            name, n = f"{base}-{n}", n + 1
+        used.add(name)
+        out[g.vlan] = name
+    return out
 
 
 def hostnames(req: Requirements) -> dict[str, str]:
@@ -119,7 +136,7 @@ def build(plan: NetworkPlan) -> NetworkPlan:
 
     for s in req.sites:
         base = names[s.id]
-        vlans = {g.vlan: safe_name(g.name).upper() for g in s.segments}
+        vlans = vlan_names(s.segments)
         seg_vlans = sorted(vlans)
         l3_name = f"rtr-{base}" if routers else f"dist-{base}"
         l3_model = "2911" if routers else "3560-24PS"

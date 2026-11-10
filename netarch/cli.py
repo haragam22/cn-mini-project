@@ -33,7 +33,8 @@ _state = {"debug": False}
 def _console(err: bool = False) -> Console:
     stream = sys.stderr if err else sys.stdout
     wide = None if stream.isatty() else 200  # pipes/files: never truncate table cells
-    return Console(stderr=err, highlight=False, soft_wrap=True, width=wide)
+    # markup off: user strings such as "[/]" must print literally, never parse (security F1)
+    return Console(stderr=err, highlight=False, soft_wrap=True, width=wide, markup=False)
 
 
 def _utf8() -> None:
@@ -63,8 +64,8 @@ def _fail(e: NetArchError, kind: str, code: int) -> typer.Exit:
     if _state["debug"]:
         raise e
     errs = e.errors if isinstance(e, InputValidationError) else [e]
-    body = "\n\n".join(f"[b]{x.field}[/b] = {x.value!r}\nrule {x.rule_id}: {x.message}\n"
-                       f"[i]hint:[/i] {x.hint}" for x in errs)
+    body = "\n\n".join(f"{x.field} = {x.value!r}\nrule {x.rule_id}: {x.message}\n"
+                       f"hint: {x.hint}" for x in errs)
     _console(err=True).print(Panel(body, title=f"{kind} error", border_style="red"))
     return typer.Exit(code)
 
@@ -195,8 +196,8 @@ def export(
     except OSError as e:
         if _state["debug"]:
             raise
-        _console(err=True).print(Panel(f"[b]--out[/b] = {out!r}\ncannot write: {e}\n"
-                                       "[i]hint:[/i] choose a writable directory.",
+        _console(err=True).print(Panel(f"--out = {out!r}\ncannot write: {e}\n"
+                                       "hint: choose a writable directory.",
                                        title="Export error", border_style="red"))
         raise typer.Exit(2) from None
     for x in paths:

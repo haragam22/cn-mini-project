@@ -16,6 +16,9 @@
 - **P7 suite**: `tests/test_cli_tui.py` — every command and exit code via CliRunner (0/1/2/3, `--debug`), TUI headless at 120 × 35: preset → decisions → verify → export, broken JSON errors by field, what-if 95 → 105 → 450 → 12,000 → 36,000 m (Cat6a → OM4 → LR → ER → ZR), config viewer, keys.
 - **Try it**: `.venv/Scripts/netarch` (TUI), `netarch verify --preset global`, `netarch export --preset metro --out ./output --zip`, `netarch explain --preset campus --domain addressing` (P3), `.venv/Scripts/netarch explain --preset campus` (also `--preset metro --id L1-04` for the 35 km ZR case, `--domain switching`, `--markdown`).
 
+- **README screenshots**: `.venv/Scripts/python tools/screenshots.py` re-captures the 8 TUI screenshots (headless Textual, 140 × 42, SVG) into `docs/screenshots/`; export shot uses a relative path so no local user paths appear.
+- **Clean-install smoke test** (packaging): new venv, `pip install .` (not `-e`), then `netarch verify --preset global --no-batfish` → `SELF-CHECK: PASS` (proves templates/data ship in the wheel).
+
 ## Your manual checks
 Items tagged `(manual)` in implementation.md. Tick them in implementation.md when done, then set the phase Status to `done`.
 

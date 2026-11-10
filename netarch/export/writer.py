@@ -38,15 +38,16 @@ def ip_plan_csv(plan: NetworkPlan) -> str:
                 "gateway", "first_host", "last_host", "broadcast", "usable", "requested",
                 "needed", "utilisation_pct"])
     for r in plan.addressing.subnets if plan.addressing else []:
-        w.writerow([r.kind, r.site or "", _csv_safe(r.name), r.vlan or "", r.network, r.prefix,
+        w.writerow([r.kind, _csv_safe(r.site or ""), _csv_safe(r.name), r.vlan or "", r.network,
+                    r.prefix,
                     r.mask, r.wildcard, r.gateway or "", r.first_host, r.last_host,
                     r.broadcast, r.usable, r.requested, r.needed, r.utilisation_pct])
     return buf.getvalue()
 
 
 def _csv_safe(text: str) -> str:
-    """Neutralise spreadsheet formula injection (=, +, -, @ at the start)."""
-    return "'" + text if text[:1] in ("=", "+", "-", "@") else text
+    """Neutralise spreadsheet formula injection (=, +, -, @, tab, CR at the start)."""
+    return "'" + text if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
 
 
 def topology_mmd(plan: NetworkPlan) -> str:

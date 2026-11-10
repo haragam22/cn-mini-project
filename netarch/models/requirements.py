@@ -166,7 +166,14 @@ Vlan = Annotated[int, Field(strict=True), AfterValidator(_check_vlan)]
 
 # --- schema --------------------------------------------------------------------------
 
-_STRICT = ConfigDict(extra="forbid")
+_STRICT = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+# Printable ASCII only: names reach IOS configs, terminals, Markdown and CSV (security F10/F13).
+Name = Annotated[str, Field(min_length=1, max_length=64, pattern=r"^[ -~]+$")]
+MAX_SITES, MAX_LINKS, MAX_SEGMENTS, MAX_RESERVED, MAX_HOSTS = 64, 256, 24, 64, 1 << 24
+# Device/site names the lab mapping generates itself (configgen/interface_map.py).
+RESERVED_SITE_IDS = frozenset({"cloud-vgw", "inet-sw", "evpl-carrier", "cloud", "internet",
+                               "carrier", "infra"})
 
 SegmentRole = Literal["users", "wireless", "management", "servers", "labs", "iot", "trading"]
 SiteKind = Literal["building", "hq", "remote", "colo", "city"]
@@ -174,18 +181,18 @@ SiteKind = Literal["building", "hq", "remote", "colo", "city"]
 
 class Segment(BaseModel):
     model_config = _STRICT
-    name: str = Field(min_length=1)
+    name: Name
     vlan: Vlan
-    hosts: int = Field(strict=True, ge=1)
+    hosts: int = Field(strict=True, ge=1, le=MAX_HOSTS)
     growth_pct: float = Field(strict=True, ge=0, le=200)
     role: SegmentRole
 
 
 class Site(BaseModel):
     model_config = _STRICT
-    id: str = Field(min_length=1)
+    id: Name
     kind: SiteKind
-    segments: list[Segment] = Field(min_length=1)
+    segments: list[Segment] = Field(min_length=1, max_length=MAX_SEGMENTS)
     access_points: int = Field(default=0, strict=True, ge=0)
     access_run_max_m: float | None = Field(default=None, strict=True, gt=0)
 
@@ -205,7 +212,7 @@ class Link(BaseModel):
 class AddressSpace(BaseModel):
     model_config = _STRICT
     root: RootCidr
-    reserved: list[Cidr] = Field(default_factory=list)
+    reserved: list[Cidr] = Field(default_factory=list, max_length=MAX_RESERVED)
 
 
 class Cloud(BaseModel):
@@ -215,11 +222,11 @@ class Cloud(BaseModel):
 
 class Requirements(BaseModel):
     model_config = _STRICT
-    profile_name: str = Field(min_length=1)
+    profile_name: Name
     profile_type: Literal["campus", "metro", "global"]
     address_space: AddressSpace
-    sites: list[Site] = Field(min_length=1)
-    links: list[Link] = Field(default_factory=list)
+    sites: list[Site] = Field(min_length=1, max_length=MAX_SITES)
+    links: list[Link] = Field(default_factory=list, max_length=MAX_LINKS)
     resiliency: Literal["dual_uplink", "dual_homed"]
     latency_target_ms: float | None = Field(default=None, strict=True, gt=0)
     cloud: Cloud | None = None
@@ -299,6 +306,13 @@ def _site_checks(sites: list[Any]) -> tuple[list[NetArchError], list[str]]:
             continue
         sid = site.get("id")
         if isinstance(sid, str) and sid:
+            if "--" in sid or sid.lower() in RESERVED_SITE_IDS:
+                errs.append(InputValidationError(
+                    field=f"sites[{i}].id", value=sid, rule_id="INPUT.SITE_ID_RESERVED",
+                    message=(f"site id {sid!r} contains '--' or is a name the lab mapping "
+                             f"uses itself ({', '.join(sorted(RESERVED_SITE_IDS))})"),
+                    hint="Pick another site id.",
+                ))
             if sid in ids:
                 errs.append(InputValidationError(
                     field=f"sites[{i}].id", value=sid, rule_id="INPUT.SITE_ID_DUPLICATE",
@@ -327,9 +341,20 @@ def _site_checks(sites: list[Any]) -> tuple[list[NetArchError], list[str]]:
 
 def _link_checks(links: list[Any], ids: list[str]) -> list[NetArchError]:
     errs: list[NetArchError] = []
+    pairs: set[frozenset[str]] = set()
     for i, link in enumerate(links):
         if not isinstance(link, dict):
             continue
+        a, b = link.get("a"), link.get("b")
+        if isinstance(a, str) and isinstance(b, str) and a != b:
+            pair = frozenset((a, b))
+            if pair in pairs:
+                errs.append(InputValidationError(
+                    field=f"links[{i}]", value=f"{a}–{b}", rule_id="INPUT.LINK_DUPLICATE",
+                    message=f"sites {a!r} and {b!r} are already linked",
+                    hint="List each pair of sites once.",
+                ))
+            pairs.add(pair)
         for end in ("a", "b"):
             v = link.get(end)
             if isinstance(v, str) and v and v not in ids:
@@ -399,6 +424,20 @@ def _address_checks(data: dict[str, Any]) -> list[NetArchError]:
             continue
         reserved.append((text, blk))
 
+    from netarch.engines.optics import load_data, value
+
+    pub_text = value(load_data("design.yaml"), "public_block")
+    pub = _valid_block(pub_text)
+    for field, text, blk in [("address_space.root", root_text, root),
+                             *((f"address_space.reserved[{k}]", t, b)
+                               for k, (t, b) in enumerate(reserved))]:
+        if blk is not None and pub is not None and overlaps(blk, pub):
+            errs.append(AddressOverlapError(
+                field=field, value=text, rule_id="ADDR.OVERLAP",
+                message=f"{text} overlaps {pub_text}, the emulated Internet segment of the lab",
+                hint="Use RFC 1918 space, e.g. 10.0.0.0/16.",
+            ))
+
     cloud = data.get("cloud")
     vpc_text = cloud.get("vpc_cidr") if isinstance(cloud, dict) else None
     vpc = _valid_block(vpc_text)
@@ -467,10 +506,17 @@ def load_requirements(data: Any) -> Requirements:
     return Requirements.model_validate(data)
 
 
+def _no_dupes(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    keys = [k for k, _ in pairs]
+    if dup := sorted({k for k in keys if keys.count(k) > 1}):
+        raise ValueError(f"duplicate JSON key(s) {dup}")
+    return dict(pairs)
+
+
 def load_requirements_file(path: str | Path) -> Requirements:
     try:
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        data = json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=_no_dupes)
+    except (OSError, ValueError, RecursionError) as exc:  # incl. UnicodeDecodeError
         raise InputValidationError(
             field="<file>", value=str(path), rule_id="INPUT.FILE",
             message=f"cannot read {path} as JSON: {exc}",

@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal, VerticalScroll
 from textual.widgets import (
@@ -64,10 +65,10 @@ class NetArchApp(App):
                 yield Button(p.capitalize(), id=f"preset-{p}")
             yield Input(placeholder="custom JSON path", id="json-path")
             yield Button("Load JSON", id="load-json")
-        yield Static("", id="errors")
+        yield Static("", markup=False, id="errors")
         with TabbedContent(initial="design", id="tabs"):
             with TabPane("Design", id="design"), VerticalScroll():
-                yield Static("Pick a preset or load a JSON file.", id="summary")
+                yield Static("Pick a preset or load a JSON file.", markup=False, id="summary")
             with TabPane("Decisions", id="decisions"):
                 yield Tree("Decisions", id="tree")
             with TabPane("IP Plan", id="ipplan"):
@@ -76,21 +77,21 @@ class NetArchApp(App):
                 yield Select([], id="link-select", prompt="link")
                 yield Input(placeholder="distance in metres", id="distance")
                 yield Button("Apply", id="apply-distance")
-                yield Static("", id="whatif-out")
+                yield Static("", markup=False, id="whatif-out")
             with TabPane("Configs", id="configs"), VerticalScroll():
                 yield Select([], id="device-select", prompt="device")
-                yield Static("", id="config-view")
+                yield Static("", markup=False, id="config-view")
             with TabPane("Verify", id="verify"), VerticalScroll():
                 yield Button("Run self-check", id="run-verify")
                 yield DataTable(id="verify-table")
-                yield Static("", id="verify-status")
+                yield Static("", markup=False, id="verify-status")
             with TabPane("Export", id="export"), VerticalScroll():
                 yield Input(value="./output", id="export-path")
                 yield Select([("pt", "pt"), ("full", "full")], value="pt", id="dialect",
                              allow_blank=False)
                 yield Checkbox("ZIP all", id="zip")
                 yield Button("Export", id="do-export")
-                yield Static("", id="export-out")
+                yield Static("", markup=False, id="export-out")
         yield Footer()
 
     def on_mount(self) -> None:
@@ -124,7 +125,7 @@ class NetArchApp(App):
     def load_json(self, path: str) -> bool:
         try:
             raw = json.loads(Path(path).read_text(encoding="utf-8"))
-        except (OSError, ValueError) as e:
+        except (OSError, ValueError, RecursionError) as e:
             self.query_one("#errors", Static).update(f"✗ file: cannot read {path!r}: {e}")
             return False
         return self.load_raw(raw)
@@ -159,17 +160,18 @@ class NetArchApp(App):
         tree.clear()
         doms: dict[str, Any] = {}
         for d in p.decisions:
-            node = doms.get(d.domain) or tree.root.add(d.domain, expand=False)
+            node = doms.get(d.domain) or tree.root.add(Text(d.domain), expand=False)
             doms[d.domain] = node
-            leaf = node.add(f"{d.id} {d.subject}: {d.choice}")
+            leaf = node.add(Text(f"{d.id} {d.subject}: {d.choice}"))
             for line in render_text(d).splitlines()[1:]:
-                leaf.add_leaf(line)
+                leaf.add_leaf(Text(line))
         tree.root.expand()
         t = self.query_one("#iptable", DataTable)
         t.clear()
         for r in p.addressing.subnets:
-            t.add_row(r.kind, r.site or "", r.name, str(r.vlan or ""), r.cidr, r.mask,
-                      r.wildcard, r.gateway or "", str(r.usable), str(r.requested))
+            t.add_row(*(Text(x) for x in (r.kind, r.site or "", r.name, str(r.vlan or ""),
+                                          r.cidr, r.mask, r.wildcard, r.gateway or "",
+                                          str(r.usable), str(r.requested))))
         links = [(f"{lk.a} ↔ {lk.b}", str(i)) for i, lk in enumerate(p.requirements.links)]
         self.query_one("#link-select", Select).set_options(links)
         self.query_one("#device-select", Select).set_options(
@@ -218,8 +220,8 @@ class NetArchApp(App):
         t = self.query_one("#verify-table", DataTable)
         t.clear()
         for r in res:
-            t.add_row(r.id, r.device, ("✓ " if r.status == "PASS" else "✗ ") + r.status,
-                      r.message)
+            t.add_row(Text(r.id), Text(r.device),
+                      Text(("✓ " if r.status == "PASS" else "✗ ") + r.status), Text(r.message))
         self.query_one("#verify-status", Static).update(
             "SELF-CHECK: " + ("PASS" if all_pass(res) else "FAIL")
             + "   BATFISH: run `netarch verify` with Docker up (not run here)")

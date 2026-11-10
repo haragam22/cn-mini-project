@@ -169,3 +169,12 @@ Append-only. Newest at bottom.
 - Self-check C10 also checks tunnel source = own public IP and matching PSKs.
 - Batfish: host JSON carries the gateway; `parseWarning`; hub route check (other areas' site blocks present, their segment subnets absent); `netarch verify --report` writes `batfish-report.md` when Batfish ran.
 - Known, not fixed: QOS.LAT assumes 1 Gbps serialisation while the lab EVPL carrier 2960 ports run 100 Mbps (0.12 ms/hop, still far under 5 ms); C8 does not compare areas across a link.
+
+## 2026-11-10 — Input hardening from the P0–P7 security review (docs/security/p0-p7.md)
+- **Names** (profile_name, site id, segment name): printable ASCII, 1–64 chars. Site ids may not contain `--` (infra row separator) or equal a generated device/site name (cloud-vgw, inet-sw, evpl-carrier, cloud, internet, carrier, infra; case-insensitive).
+- **Caps**: sites ≤ 64, links ≤ 256, segments ≤ 24 per site (one PC port each on the 24-port lab access switch), reserved ≤ 64, hosts ≤ 2^24 (a /8 holds 2^24). Floats reject inf/NaN.
+- **Duplicate link pairs** (either direction) and **duplicate JSON keys** are input errors.
+- **Root/reserved** must not overlap the lab Internet block (design.yaml `public_block`).
+- **VLAN names**: ≤ 32 chars (IOS limit), de-duplicated per site with -2, -3 …
+- **CLI/TUI never interpret user text as markup** (Rich console `markup=False`; Textual `markup=False` / `Text`).
+- **Why**: each item had a working crash or broken-config reproduction. **Alternatives**: escape markup per call site (easy to miss one); key infra rows by index (bigger refactor on deadline day).

@@ -14,15 +14,15 @@ Updated 2026-11-10 (deadline day — see implementation.md §12 cut line; applyi
 | P7 CLI/TUI | manual | All commands + exit codes (export write errors → panel, exit 2), Textual TUI. **User:** Windows Terminal 120 × 35 check; **decide** whether the single field-labelled errors panel is acceptable vs per-field form (reviewer gap). |
 | P8 Lab validation | todo (manual) | PT builds of 3 presets + `ai_audit_log.md` entries (raw candidates in audit/raw/, 2 now). |
 | P8.5 User simulation | todo | ≥ 1,000 simulated users (`user-sim` skill) + clear docs/security/backlog.md + full-project security-breaker run. |
-| P9 Docs/release | todo | Video, release, repo public (user). |
+| P9 Docs/release | in progress | In-depth README + 8 real TUI screenshots (2026-11-10). **User:** demo video, PT screenshots, v1.0.0 release. |
 
 ## Pending before/at resume
-1. Run `security-breaker` on P0–P2 (never run yet; new workflow module 2026-10-24). Fix critical/high with reproducing tests; medium/low → docs/security/backlog.md.
+1. security-breaker ran on P0–P7 (2026-11-10): 6 high all fixed with tests (docs/security/p0-p7.md); open critical/high 0; backlog F11 (dnspython pin), F14 (ZIP holds config secrets); QUESTIONS.md: public root allowed?
 2. Optionally re-run `phase-reviewer` on P1 and P2 for an independent verdict (agents are now allowed in settings).
-3. P4–P7 built 2026-11-10; next: phase-reviewer verdicts for P4–P7, security-breaker, Batfish run (Docker), then P8 (user, PT) / P8.5 / P9 README + release.
+3. Next: user commits staged work; Batfish run with Docker + the 3 missing Batfish checks (searchFilters, policy traceroutes, Metro failover fork); P8 PT builds + ai_audit_log.md; P8.5 user-sim; P9 video + release.
 
 ## Repo state
-- Everything since the first commit (0a13a44) is uncommitted: P0–P2 **staged**; P3 work (2026-11-10) **unstaged/untracked** until the user stages it. Commit via `/quiz`, then `git push -u origin main` (remote `haragam22/cn-mini-project` exists but is empty).
-- Gate: `.claude/test-command` → 548 passed, 7 Batfish deselected, 0 skipped (at P7). Coverage 99 % overall.
+- Commits: `0a13a44` plan, `ca5bd55` P3–P7 (user, 2026-11-10). **Staged, not committed:** security fixes (docs/security/p0-p7.md), in-depth README + 8 TUI screenshots (`docs/screenshots/`, `tools/screenshots.py`). Commit (quiz gate disabled), then `git push -u origin main` (remote `haragam22/cn-mini-project` exists but is empty).
+- Gate: `.claude/test-command` → 584 passed, 7 Batfish deselected, 0 skipped (at P7 + security fixes). Coverage 99 % overall.
 - Quiz pre-commit hook disabled at user request: `.git/hooks/pre-commit.quiz-disabled` (rename back to restore). Batfish suite: `-m batfish` with Docker up (README command).
 - T1 audit candidates: audit/raw/ (1 so far).
