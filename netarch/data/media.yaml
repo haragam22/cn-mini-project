@@ -1,0 +1,109 @@
+# Fibre plant constants for the optical power budget (technical.md §5.3).
+# Every constant is a mapping with value / unit / source. Values are the technical.md
+# working values; where an authoritative source differs, the source string says so.
+# Verified in Phase 0 (2026-10-23).
+
+attenuation:
+  os2_1310nm:
+    value: 0.35
+    unit: dB/km
+    used_by: [10GBASE-LR]
+    source: >-
+      Working value (technical.md §5.3). Typical cabled G.652.D at 1310 nm is 0.35 dB/km
+      (Fujikura G.652.D datasheet FPE08B, typical; Leviton OS2 G.652.D spec 55683 cabled 0.38 dB/km).
+      DISCREPANCY: IEEE 802.3 Clause 52 Table 52-14 note c computes LR channel insertion loss with
+      0.4 dB/km cabled fibre at 1310 nm; ANSI/TIA-568.3-D OS2 maximum is 0.5 dB/km outside plant /
+      1.0 dB/km inside plant (Fluke Networks KA-05286). 0.35 kept by user decision (QUESTIONS.md, 2026-10-23): the P2 worked examples depend on it.
+  os2_1550nm:
+    value: 0.25
+    unit: dB/km
+    used_by: [10GBASE-ER, 10GBASE-ZR]
+    source: >-
+      Working value (technical.md §5.3). Leviton OS2 G.652.D spec 55683 cabled attenuation
+      0.25 dB/km at 1550 nm. IEEE 802.3 Clause 52 ER budget implies (11 - 2) / 40 = 0.225 dB/km
+      (IEEE 802.3 100GNGOPTX reflector msg00587, Anslow 2012-08-22). ANSI/TIA-568.3-D OS2 maximum
+      is 0.5 dB/km outside plant / 1.0 dB/km inside plant (Fluke Networks KA-05286).
+  om4_850nm:
+    value: 3.0
+    unit: dB/km
+    used_by: [10GBASE-SR]
+    source: >-
+      ANSI/TIA-568.3-D / TIA-492AAAD OM4 maximum 3.0 dB/km at 850 nm (Fluke Networks KA-05286).
+      Note: IEEE 802.3 Clause 52 SR tables assume 3.5 dB/km multimode; SR is reach-limited in
+      this project so the figure is informational.
+
+connector:
+  loss_db:
+    value: 0.5
+    unit: dB
+    source: >-
+      Working (typical) value, technical.md §5.3; within the TIA-568 maximum of 0.75 dB per mated
+      pair (FOA, "TIA-568 fiber optic requirements", thefoa.org/tech/tia568b3.htm).
+  tia_max_db:
+    value: 0.75
+    unit: dB
+    source: >-
+      TIA-568 maximum mated-pair connector loss 0.75 dB, MM and SM (FOA, thefoa.org/tech/tia568b3.htm).
+  per_link:
+    value: 2
+    unit: count
+    source: >-
+      Design assumption (technical.md §5.3): one patch connection at each end. IEEE 802.3 Clause 52
+      (52.14.2.1) allocates 2 dB total connection and splice loss for 10GBASE-L/E links (IEEE 802.3
+      100GNGOPTX reflector msg00752, quoting IEEE 802.3-2012).
+
+splice:
+  loss_db:
+    value: 0.1
+    unit: dB
+    source: >-
+      Working (typical fusion splice) value, technical.md §5.3; within the TIA-568 maximum of 0.3 dB
+      (FOA, thefoa.org/tech/tia568b3.htm).
+  tia_max_db:
+    value: 0.3
+    unit: dB
+    source: >-
+      TIA-568: "Fusion or mechanical splices shall not have a loss of more than 0.3 dB" (FOA,
+      thefoa.org/tech/tia568b3.htm).
+
+reel_length_km:
+  value: 4
+  unit: km
+  source: >-
+    Design assumption (technical.md §5.3): one splice per 4 km cable reel. No IEEE/TIA standard
+    defines reel length and no external source was found in Phase 0; it drives only n_splice.
+
+min_operating_margin_db:
+  value: 1.0
+  unit: dB
+  configurable: true
+  source: >-
+    Project design choice (technical.md §5.3): operating reserve for ageing, repairs and dirty
+    connectors, applied on top of the IEEE channel insertion loss (which already reserves
+    dispersion penalties). Not a standard value.
+
+# Copper channel model (technical.md §5.1 MEDIA.R1, §5.2 MEDIA.X2/X3). Added in P2.
+copper:
+  channel_max_m:
+    value: 100
+    unit: m
+    source: >-
+      IEEE 802.3an (10GBASE-T, IEEE 802.3 Clause 55): 100 m channel over Class EA / Cat6a
+      (technical.md §5.1 MEDIA.R1).
+  permanent_link_max_m:
+    value: 90
+    unit: m
+    source: >-
+      ANSI/TIA-568.2-D channel model: 90 m permanent link + 10 m of patch/equipment cords
+      (technical.md §5.2 MEDIA.X2).
+  patch_cords_max_m:
+    value: 10
+    unit: m
+    source: >-
+      ANSI/TIA-568.2-D channel model: 10 m total patch/equipment cords (technical.md §5.2 MEDIA.X2).
+  cat6_10g_max_m:
+    value: 55
+    unit: m
+    source: >-
+      technical.md §5.2 MEDIA.X3: 10GBASE-T over Cat6 is rejected above 55 m (TIA TSB-155 /
+      IEEE 802.3an Class E reach), so Cat6a is required for a 100 m channel at 10G.

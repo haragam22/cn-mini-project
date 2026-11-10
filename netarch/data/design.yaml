@@ -1,0 +1,102 @@
+# Routing / VPN / QoS / ACL design constants (technical.md §8). Each: value / unit / source.
+
+ospf_reference_bandwidth_mbps:
+  value: 10000
+  unit: Mbps
+  source: "technical.md §8.2: auto-cost reference-bandwidth 10000 (10 Gbps) on every router."
+ospf_subnet_threshold:
+  value: 50
+  unit: subnets
+  source: "technical.md §8.1 RT.R1/RT.R2: single area below 50 subnets."
+metro_hello_s:
+  value: 1
+  unit: s
+  source: "technical.md §8.2: ip ospf hello-interval 1 on EVPL links."
+metro_dead_s:
+  value: 4
+  unit: s
+  source: "technical.md §8.2: ip ospf dead-interval 4 on EVPL links."
+ospf_default_dead_s:
+  value: 40
+  unit: s
+  source: "RFC 2328 / Cisco IOS default: dead interval = 4 × hello 10 s on broadcast/p2p."
+primary_cost:
+  value: 10
+  unit: cost
+  source: "technical.md §8.3: primary EVPL (to HQ) has the lower OSPF cost; value chosen < backup."
+backup_cost:
+  value: 100
+  unit: cost
+  source: "technical.md §8.3: backup EVPL (to Colo) has the higher OSPF cost (10 × primary)."
+evc_base:
+  value: 101
+  unit: dot1Q tag
+  source: "technical.md §8.3: EVPL as sub-interfaces, e.g. Gi0/1.101 with encapsulation dot1Q 101."
+org_asn:
+  value: 65001
+  unit: ASN
+  source: "technical.md §8.3: org AS 65001 (RFC 6996 private range)."
+cloud_asn:
+  value: 64512
+  unit: ASN
+  source: "technical.md §8.3: cloud AS 64512 (RFC 6996 private range)."
+public_block:
+  value: "203.0.113.0/24"
+  unit: CIDR
+  source: "RFC 5737 TEST-NET-3: documentation range used for the emulated Internet segment."
+internet_vlan:
+  value: 900
+  unit: VLAN
+  source: "Lab-only VLAN for the emulated Internet switch (not VLAN 1, not native 999)."
+tunnel_ip_mtu:
+  value: 1400
+  unit: bytes
+  source: "technical.md §8.4: ip mtu 1400 on GRE-over-IPsec tunnels."
+tunnel_tcp_mss:
+  value: 1360
+  unit: bytes
+  source: "technical.md §8.4: ip tcp adjust-mss 1360 (1400 − 40 B IP+TCP headers)."
+fibre_ms_per_km:
+  value: 0.005
+  unit: ms/km
+  source: "technical.md §8.5: ≈ 5 µs/km in fibre (n ≈ 1.47)."
+frame_bytes:
+  value: 1500
+  unit: bytes
+  source: "technical.md §8.5 example: 1500 B frame."
+lab_link_bps:
+  value: 1000000000
+  unit: bit/s
+  source: "technical.md §8.5 example: serialisation at 1 Gbps (lab GigabitEthernet port speed)."
+per_hop_ms:
+  value: 0.05
+  unit: ms
+  source: "technical.md §8.5: per-hop processing 0.05 ms — an assumption (decisions.md 2026-10-23)."
+latency_hops:
+  value: 2
+  unit: hops
+  source: "technical.md §8.5 example: 2 hops (router at each end of the EVPL)."
+llq_priority_percent:
+  value: 30
+  unit: "%"
+  source: "technical.md §8.5: priority percent 30 for class TRADING."
+trading_tcp_ports:
+  value: [443]
+  unit: ports
+  source: "technical.md §8.6 Metro 'configured ports'; 443 (TLS) chosen as the default (decisions.md)."
+iot_collector_tcp_ports:
+  value: [8883, 443]
+  unit: ports
+  source: "technical.md §8.6 Global: IoT → collector tcp 8883 (MQTT over TLS) / 443."
+iot_infra_udp_ports:
+  value: [53, 123]
+  unit: ports
+  source: "technical.md §8.6 Global: IoT → DNS (udp 53) / NTP (udp 123) infra."
+wifi_server_tcp_ports:
+  value: [80, 443]
+  unit: ports
+  source: "technical.md §8.6 Campus: WIFI → SERVERS permit tcp 80/443."
+wifi_server_udp_ports:
+  value: [53]
+  unit: ports
+  source: "technical.md §8.6 Campus: WIFI → SERVERS permit udp 53."

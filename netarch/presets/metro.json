@@ -1,0 +1,57 @@
+{
+  "profile_name": "metro",
+  "profile_type": "metro",
+  "address_space": { "root": "10.0.0.0/16", "reserved": [] },
+  "sites": [
+    {
+      "id": "hq",
+      "kind": "hq",
+      "segments": [
+        { "name": "STAFF",   "vlan": 10, "hosts": 250, "growth_pct": 20, "role": "users" },
+        { "name": "TRADING", "vlan": 50, "hosts": 60,  "growth_pct": 20, "role": "trading" },
+        { "name": "SERVERS", "vlan": 40, "hosts": 30,  "growth_pct": 20, "role": "servers" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 10,  "growth_pct": 0,  "role": "management" }
+      ]
+    },
+    {
+      "id": "remote-1",
+      "kind": "remote",
+      "segments": [
+        { "name": "STAFF", "vlan": 10, "hosts": 80, "growth_pct": 20, "role": "users" },
+        { "name": "MGMT",  "vlan": 99, "hosts": 10, "growth_pct": 0,  "role": "management" }
+      ]
+    },
+    {
+      "id": "remote-2",
+      "kind": "remote",
+      "segments": [
+        { "name": "STAFF", "vlan": 10, "hosts": 60, "growth_pct": 20, "role": "users" },
+        { "name": "MGMT",  "vlan": 99, "hosts": 10, "growth_pct": 0,  "role": "management" }
+      ]
+    },
+    {
+      "id": "colo",
+      "kind": "colo",
+      "segments": [
+        { "name": "TRADING", "vlan": 50, "hosts": 20, "growth_pct": 20, "role": "trading" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 10, "growth_pct": 0,  "role": "management" }
+      ]
+    }
+  ],
+  "links": [
+    { "a": "hq", "b": "remote-1", "distance_m": 22000, "inter_building": true,
+      "required_gbps": 10, "requested_media": null },
+    { "a": "hq", "b": "remote-2", "distance_m": 35000, "inter_building": true,
+      "required_gbps": 10, "requested_media": null },
+    { "a": "hq", "b": "colo", "distance_m": 15000, "inter_building": true,
+      "required_gbps": 10, "requested_media": null },
+    { "a": "remote-1", "b": "colo", "distance_m": 20000, "inter_building": true,
+      "required_gbps": 10, "requested_media": null },
+    { "a": "remote-2", "b": "colo", "distance_m": 30000, "inter_building": true,
+      "required_gbps": 10, "requested_media": null }
+  ],
+  "resiliency": "dual_homed",
+  "latency_target_ms": 5,
+  "cloud": null,
+  "target_dialect": "pt"
+}

@@ -2,16 +2,19 @@
 Terminal app that acts as a junior network architect: describe an organisation, it designs the network, explains every decision, writes Cisco IOS configs, and verifies them. CIC-307 Computer Networks mini-project, individual, **hard deadline 10 Nov 2026**.
 
 ## Stack
-Python (3.11 per plan; final version pinned in P0) · pydantic v2 · Typer + Rich · Textual · Jinja2 · pybatfish + Batfish (Docker) · pytest, hypothesis, pytest-cov, syrupy · ruff.
-Package: `netarch/` (layout in docs/technical.md §2). Entry point: `netarch`.
+Python 3.12 (pinned in P0; exact package pins in pyproject.toml) · pydantic v2 · Typer + Rich · Textual · Jinja2 · pybatfish + Batfish (Docker) · pytest, hypothesis, pytest-cov, syrupy · ruff.
+Package: `netarch/` (layout in docs/technical.md §2; data files in `netarch/data/`). Entry point: `netarch`.
 
 ## Commands
-- Install: `py -3.11 -m venv .venv && .venv/Scripts/python -m pip install -e .[dev]` (version per P0)
+- Install: `py -3.12 -m venv .venv && .venv/Scripts/python -m pip install -e .[dev]`
 - Run: `netarch` (TUI) · `netarch --help` (CLI)
 - Test gate: `.claude/test-command` (excludes Batfish; see docs/testing.md)
 - Batfish suite: Docker + Batfish up, then `.venv/Scripts/python -m pytest -q -m batfish`
 
 ## Docs (read on demand)
+- docs/STATUS.md — **resume point: phase states, what's pending, repo state (read first)**
+- docs/pt-matrix-guide.md — how the user fills the Packet Tracer capability matrix
+- docs/security/ — security-breaker reports per phase + backlog.md (medium/low findings)
 - docs/idea.md — problem, scope, rubric, demo script
 - docs/technical.md — design source of truth: rules, math, data model, templates, verification
 - docs/implementation.md — phases P0–P9 + tracks T1/T2, gates = Done when, cut line §12

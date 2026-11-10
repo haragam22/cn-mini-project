@@ -1,0 +1,52 @@
+{
+  "profile_name": "global",
+  "profile_type": "global",
+  "address_space": { "root": "10.0.0.0/16", "reserved": [] },
+  "sites": [
+    {
+      "id": "delhi",
+      "kind": "hq",
+      "segments": [
+        { "name": "USERS",   "vlan": 10, "hosts": 200, "growth_pct": 20, "role": "users" },
+        { "name": "IOT",     "vlan": 60, "hosts": 500, "growth_pct": 20, "role": "iot" },
+        { "name": "SERVERS", "vlan": 40, "hosts": 40,  "growth_pct": 20, "role": "servers" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 10,  "growth_pct": 0,  "role": "management" }
+      ]
+    },
+    {
+      "id": "mumbai",
+      "kind": "city",
+      "segments": [
+        { "name": "USERS",   "vlan": 10, "hosts": 100, "growth_pct": 20, "role": "users" },
+        { "name": "IOT",     "vlan": 60, "hosts": 500, "growth_pct": 20, "role": "iot" },
+        { "name": "SERVERS", "vlan": 40, "hosts": 10,  "growth_pct": 20, "role": "servers" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 10,  "growth_pct": 0,  "role": "management" }
+      ]
+    },
+    {
+      "id": "bangalore",
+      "kind": "city",
+      "segments": [
+        { "name": "USERS",   "vlan": 10, "hosts": 100, "growth_pct": 20, "role": "users" },
+        { "name": "IOT",     "vlan": 60, "hosts": 500, "growth_pct": 20, "role": "iot" },
+        { "name": "SERVERS", "vlan": 40, "hosts": 10,  "growth_pct": 20, "role": "servers" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 10,  "growth_pct": 0,  "role": "management" }
+      ]
+    },
+    {
+      "id": "singapore",
+      "kind": "city",
+      "segments": [
+        { "name": "USERS",   "vlan": 10, "hosts": 100, "growth_pct": 20, "role": "users" },
+        { "name": "IOT",     "vlan": 60, "hosts": 500, "growth_pct": 20, "role": "iot" },
+        { "name": "SERVERS", "vlan": 40, "hosts": 10,  "growth_pct": 20, "role": "servers" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 10,  "growth_pct": 0,  "role": "management" }
+      ]
+    }
+  ],
+  "links": [],
+  "resiliency": "dual_uplink",
+  "latency_target_ms": null,
+  "cloud": { "vpc_cidr": "172.31.0.0/16" },
+  "target_dialect": "pt"
+}

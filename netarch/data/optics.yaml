@@ -1,0 +1,123 @@
+# 10G optics catalogue (technical.md §5.3, §5.4).
+# Each constant is a mapping with value / unit / source. Values are the technical.md
+# working values; where an authoritative source differs, the source string says so.
+# Verified in Phase 0 (2026-10-23).
+# Cisco datasheet = "Cisco 10GBASE SFP+ Modules Data Sheet" (cisco.com, data_sheet_c78-455693).
+
+optics:
+  10GBASE-T:
+    media: Cat6a
+    wavelength_nm:
+      value: null
+      unit: nm
+      source: "Not applicable: copper PHY (IEEE 802.3 Clause 55)."
+    ieee: true
+    reach_m:
+      value: 100
+      unit: m
+      source: "IEEE 802.3 Clause 55 (10GBASE-T): 100 m over Class EA / Cat6a."
+    channel_insertion_loss_db:
+      value: null
+      unit: dB
+      source: "Not applicable: copper PHY, no optical budget (technical.md §5.3)."
+    cost_rank:
+      value: 1
+      unit: rank
+      source: "Project relative cost order (technical.md §5.3); not a standard value."
+
+  10GBASE-SR:
+    media: OM3/OM4
+    wavelength_nm:
+      value: 850
+      unit: nm
+      source: "Cisco datasheet SFP-10G-SR: 850 nm (840 to 860 nm); IEEE 802.3 Clause 52 (10GBASE-S)."
+    ieee: true
+    reach_m:
+      value: {OM3: 300, OM4: 400}
+      unit: m
+      source: >-
+        Cisco datasheet SFP-10G-SR: "Using 2000 MHz*km MMF (OM3), up to 300-meter link lengths";
+        "Using 4700 MHz*km MMF (OM4), up to 400 meter link lengths".
+    channel_insertion_loss_db:
+      value: null
+      unit: dB
+      source: "Reach-limited (technical.md §5.3): selection uses reach only, no budget check."
+    cost_rank:
+      value: 2
+      unit: rank
+      source: "Project relative cost order (technical.md §5.3); not a standard value."
+
+  10GBASE-LR:
+    media: OS2
+    wavelength_nm:
+      value: 1310
+      unit: nm
+      source: "Cisco datasheet SFP-10G-LR: 1310 nm (1260 to 1355 nm); IEEE 802.3 Clause 52 (10GBASE-L)."
+    ieee: true
+    reach_m:
+      value: 10000
+      unit: m
+      source: >-
+        IEEE 802.3 Clause 52 Table 52-11 (10 km); Cisco datasheet SFP-10G-LR: "supports a link
+        length of 10 kilometers on standard Single-Mode Fiber (SMF) (G.652)".
+    channel_insertion_loss_db:
+      value: 6.2
+      unit: dB
+      source: >-
+        IEEE 802.3 Clause 52 Table 52-14: 6.2 dB (10 km x 0.42 dB/km + 2 dB connections), as listed
+        in IEEE 802.3dj presentation stassar_3dj_optx_01a_230427. Table 52-14 note c states the
+        basis as 0.4 dB/km at 1310 nm plus the 52.14.2.1 connection/splice allocation.
+    cost_rank:
+      value: 3
+      unit: rank
+      source: "Project relative cost order (technical.md §5.3); not a standard value."
+
+  10GBASE-ER:
+    media: OS2
+    wavelength_nm:
+      value: 1550
+      unit: nm
+      source: "Cisco datasheet SFP-10G-ER: 1550 nm (1530 to 1565 nm); IEEE 802.3 Clause 52 (10GBASE-E)."
+    ieee: true
+    reach_m:
+      value: 40000
+      unit: m
+      source: >-
+        IEEE 802.3 Clause 52 (40 km engineered link); Cisco datasheet SFP-10G-ER: "link length of
+        up to 40 kilometers on standard Single-Mode Fiber (SMF, G.652)".
+    channel_insertion_loss_db:
+      value: 11
+      unit: dB
+      source: >-
+        IEEE 802.3 Clause 52 Table 52-24 maximum channel insertion loss 11 dB, with 2 dB for
+        connections (IEEE 802.3 100GNGOPTX reflector msg00587, Anslow corrected 2012-08-22).
+        Cisco datasheet power range Tx min -4.7 dBm / Rx min -15.8 dBm (11.1 dB) agrees.
+    cost_rank:
+      value: 4
+      unit: rank
+      source: "Project relative cost order (technical.md §5.3); not a standard value."
+
+  10GBASE-ZR:
+    media: OS2
+    wavelength_nm:
+      value: 1550
+      unit: nm
+      source: "Cisco datasheet SFP-10G-ZR: 1550 nm (1530 to 1565 nm). Vendor optic, not IEEE."
+    ieee: false
+    reach_m:
+      value: 80000
+      unit: m
+      source: >-
+        Vendor (non-IEEE) optic. Cisco datasheet SFP-10G-ZR: "link lengths of up to about 80
+        kilometers on standard Single-Mode Fiber (SMF, G.652)".
+    channel_insertion_loss_db:
+      value: 23
+      unit: dB
+      source: >-
+        Working value (technical.md §5.3). Cisco datasheet SFP-10G-ZR: Tx min 0 dBm, Rx min -24 dBm
+        (24 dB power budget, BER 1E-12); reseller listings quote a 23 dB minimum guaranteed optical
+        budget. 23 dB is the conservative figure (1 dB below the Tx/Rx difference).
+    cost_rank:
+      value: 5
+      unit: rank
+      source: "Project relative cost order (technical.md §5.3); not a standard value."

@@ -608,7 +608,7 @@ snapshot/
 | Reachability | `traceroute` per policy matrix row | permits ACCEPTED, denies DENIED |
 | Failover (Metro) | `traceroute` on a fork with the primary EVPL shut (`bf.fork_snapshot`, deactivate interfaces) | path moves via Colo |
 
-**Graceful degradation:** if Batfish is unreachable within 3 s, verification reports `BATFISH: NOT CONNECTED (skipped)` and still runs the self-check. Tests marked `@pytest.mark.batfish` are skipped. A saved `batfish-report.md` from the last good run can be shown in the TUI as a backup for the demo.
+**Graceful degradation:** if Batfish is unreachable within 3 s, verification reports `BATFISH: NOT CONNECTED (skipped)` and still runs the self-check. Tests marked `@pytest.mark.batfish` are deselected from the test gate (`-m "not batfish"`) and run separately with Docker up. A saved `batfish-report.md` from the last good run can be shown in the TUI as a backup for the demo.
 
 ### 11.3 Packet Tracer checklist (generated)
 
@@ -683,7 +683,7 @@ Each error carries `field`, `value`, `rule_id`, `message`, `hint`. `PhysicalDist
 | Property-based | hypothesis | VLSM: random roots + request sets vs `ipaddress` oracle |
 | Golden files | syrupy | rendered configs per preset × dialect. Any change shows as a diff |
 | Integration | pytest | preset → plan → configs → self-check, end to end |
-| Batfish | `@pytest.mark.batfish` | §11.2 assertions; skipped when Docker is down |
+| Batfish | `@pytest.mark.batfish` | §11.2 assertions; deselected from the test gate (`-m "not batfish"`), run separately with Docker up |
 
 Coverage target: ≥ 90 % on `engines/`, ≥ 80 % overall.
 

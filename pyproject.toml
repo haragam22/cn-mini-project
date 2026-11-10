@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netarch"
+version = "0.0.1"
+description = "NetArchitect: a terminal junior network architect (design, explain, configure, verify)."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pydantic==2.14.1",
+    "typer==0.27.3",
+    "rich==15.0.0",
+    "textual==8.2.8",
+    "Jinja2==3.1.6",
+    "ciscoconfparse2==0.9.18",
+    "pybatfish==2026.9.17.3748",
+    "PyYAML==6.0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "hypothesis==6.152.7",
+    "pytest-cov==7.1.0",
+    "syrupy==6.1.1",
+    "ruff==0.17.2",
+]
+
+[project.scripts]
+netarch = "netarch.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["netarch*"]
+
+[tool.setuptools.package-data]
+netarch = ["data/*.yaml", "presets/*.json", "configgen/templates/*.j2", "configgen/templates/partials/*.j2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "batfish: needs Docker + Batfish running on localhost (excluded from the gate; run with -m batfish)",
+]
+addopts = "--strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["tests/fixtures"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

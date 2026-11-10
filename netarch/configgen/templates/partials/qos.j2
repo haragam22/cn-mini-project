@@ -1,0 +1,17 @@
+{% if flags.qos and qos %}
+{% for q in qos if q.details.kind == 'llq' %}
+class-map match-any {{ q.details.class }}
+ match dscp {{ q.details.dscp }}
+policy-map {{ q.name }}
+ class {{ q.details.class }}
+  priority percent {{ q.details.priority_percent }}
+ class class-default
+  fair-queue
+{% endfor %}
+{% for q in qos if q.details.kind == 'marking' %}
+policy-map {{ q.name }}
+ class class-default
+  set dscp {{ q.details.dscp }}
+{% endfor %}
+!
+{% endif %}

@@ -1,0 +1,127 @@
+# Packet Tracer 8.x capability matrix (technical.md §12).
+# Filled in by hand in Packet Tracer on 2911 / 3560-24PS / 2960-24TT.
+# result: untested | accepted | rejected | alternative
+#   alternative -> put the syntax PT accepts in `alternative:`.
+# Every "rejected" row becomes a `pt` dialect downgrade rule plus a rationale line.
+# notes: free text (PT version, exact error message, e.g. "% Invalid input detected").
+
+features:
+  - id: trunk_encapsulation_dot1q
+    feature: "switchport trunk encapsulation dot1q"
+    devices: ["3560"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: rapid_pvst
+    feature: "spanning-tree mode rapid-pvst"
+    devices: ["3560", "2960"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: routed_port_slash31_3560
+    feature: "routed port `no switchport` + /31"
+    devices: ["3560"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: router_interface_slash31
+    feature: "/31 on router interface"
+    devices: ["2911"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: dot1q_subinterfaces
+    feature: "dot1Q sub-interfaces"
+    devices: ["2911"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ospf_auto_cost_reference_bandwidth
+    feature: "auto-cost reference-bandwidth"
+    devices: ["2911", "3560"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ospf_area_range
+    feature: "area n range"
+    devices: ["2911"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ospf_hello_dead_timers
+    feature: "OSPF hello/dead timers"
+    devices: ["2911"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ebgp_neighbor_network_null0
+    feature: "eBGP `neighbor`/`network`, Null0 anchor"
+    devices: ["2911"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: prefix_list_route_map_redistribution
+    feature: "prefix-list / route-map redistribution"
+    devices: ["2911"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: gre_tunnel
+    feature: "GRE tunnel"
+    devices: ["2911"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ikev1_crypto_map
+    feature: "IKEv1 crypto map (after securityk9)"
+    devices: ["2911"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ipsec_sha256_group14
+    feature: "sha256 / group 14 / esp-sha256-hmac"
+    devices: ["2911"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: mqc_llq
+    feature: "MQC class-map/policy-map/priority"
+    devices: ["2911"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: tunnel_adjust_mss_ip_mtu
+    feature: "`ip tcp adjust-mss`, `ip mtu` on tunnel"
+    devices: ["2911"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: svi_extended_acl_log
+    feature: "extended ACL on SVI, `log` keyword"
+    devices: ["3560"]
+    expected: uncertain
+    result: untested
+    alternative: null
+    notes: ""
+  - id: ssh_rsa_keys
+    feature: "SSH (`crypto key generate rsa`)"
+    devices: ["2911", "3560", "2960"]
+    expected: accepted
+    result: untested
+    alternative: null
+    notes: ""

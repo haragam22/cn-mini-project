@@ -1,0 +1,22 @@
+# Topology tier thresholds (technical.md §6.1, TOP.R1–R3). Each constant: value / unit / source.
+
+collapsed_single_block_max_endpoints:
+  value: 500
+  unit: endpoints
+  source: "technical.md §6.1 TOP.R1: 1 building, ≤ 500 endpoints → collapsed core in one block."
+two_tier_max_blocks:
+  value: 4
+  unit: blocks
+  source: "technical.md §6.1 TOP.R2: 2–4 buildings/distribution blocks → two-tier collapsed core."
+full_mesh_max_blocks:
+  value: 3
+  unit: blocks
+  source: "technical.md §6.1 TOP.R2: full mesh if ≤ 3 blocks, else hub."
+two_tier_max_endpoints:
+  value: 5000
+  unit: endpoints
+  source: "technical.md §6.1 TOP.R3: > 4 blocks or > 5,000 endpoints → three-tier dedicated core."
+native_vlan:
+  value: 999
+  unit: vlan
+  source: "technical.md §6.2: native VLAN 999 on every trunk (unused, no SVI); VLAN 1 never carries data."

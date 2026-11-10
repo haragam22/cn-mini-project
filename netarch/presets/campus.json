@@ -1,0 +1,55 @@
+{
+  "profile_name": "campus",
+  "profile_type": "campus",
+  "address_space": { "root": "10.0.0.0/16", "reserved": ["10.0.255.0/24"] },
+  "sites": [
+    {
+      "id": "bldg-a",
+      "kind": "building",
+      "segments": [
+        { "name": "STAFF",   "vlan": 10, "hosts": 200, "growth_pct": 20, "role": "users" },
+        { "name": "WIFI",    "vlan": 20, "hosts": 220, "growth_pct": 20, "role": "wireless" },
+        { "name": "SERVERS", "vlan": 40, "hosts": 40,  "growth_pct": 20, "role": "servers" },
+        { "name": "MGMT",    "vlan": 99, "hosts": 20,  "growth_pct": 0,  "role": "management" }
+      ],
+      "access_points": 8,
+      "access_run_max_m": 85
+    },
+    {
+      "id": "bldg-b",
+      "kind": "building",
+      "segments": [
+        { "name": "STAFF", "vlan": 10, "hosts": 180, "growth_pct": 20, "role": "users" },
+        { "name": "WIFI",  "vlan": 20, "hosts": 200, "growth_pct": 20, "role": "wireless" },
+        { "name": "LABS",  "vlan": 30, "hosts": 120, "growth_pct": 20, "role": "labs" },
+        { "name": "MGMT",  "vlan": 99, "hosts": 20,  "growth_pct": 0,  "role": "management" }
+      ],
+      "access_points": 8,
+      "access_run_max_m": 80
+    },
+    {
+      "id": "bldg-c",
+      "kind": "building",
+      "segments": [
+        { "name": "STAFF", "vlan": 10, "hosts": 220, "growth_pct": 20, "role": "users" },
+        { "name": "WIFI",  "vlan": 20, "hosts": 240, "growth_pct": 20, "role": "wireless" },
+        { "name": "LABS",  "vlan": 30, "hosts": 100, "growth_pct": 20, "role": "labs" },
+        { "name": "MGMT",  "vlan": 99, "hosts": 20,  "growth_pct": 0,  "role": "management" }
+      ],
+      "access_points": 10,
+      "access_run_max_m": 90
+    }
+  ],
+  "links": [
+    { "a": "bldg-a", "b": "bldg-b", "distance_m": 180, "inter_building": true,
+      "required_gbps": 10, "requested_media": null },
+    { "a": "bldg-b", "b": "bldg-c", "distance_m": 320, "inter_building": true,
+      "required_gbps": 10, "requested_media": null },
+    { "a": "bldg-a", "b": "bldg-c", "distance_m": 390, "inter_building": true,
+      "required_gbps": 10, "requested_media": null }
+  ],
+  "resiliency": "dual_uplink",
+  "latency_target_ms": null,
+  "cloud": null,
+  "target_dialect": "pt"
+}

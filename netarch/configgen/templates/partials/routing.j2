@@ -1,0 +1,54 @@
+{% if device.ip_routing %}
+ip routing
+!
+{% endif %}
+{% if device.ospf %}
+router ospf {{ device.ospf.process_id }}
+ router-id {{ device.ospf.router_id }}
+ auto-cost reference-bandwidth {{ device.ospf.reference_bandwidth }}
+ passive-interface default
+{% for n in device.ospf.active_interfaces %}
+ no passive-interface {{ n }}
+{% endfor %}
+{% for n in device.ospf.networks %}
+ network {{ n.network }} {{ n.wildcard }} area {{ n.area }}
+{% endfor %}
+{% for r in device.ospf.area_ranges %}
+ area {{ r.area }} range {{ r.network }} {{ r.wildcard }}
+{% endfor %}
+{% if device.ospf.redistribute_bgp and flags.redistribute %}
+ redistribute bgp {{ device.bgp.asn }} subnets route-map {{ device.ospf.redistribute_bgp }}
+{% endif %}
+!
+{% endif %}
+{% if device.bgp %}
+router bgp {{ device.bgp.asn }}
+ bgp router-id {{ device.bgp.router_id }}
+ bgp log-neighbor-changes
+{% for n in device.bgp.neighbors %}
+ neighbor {{ n.ip }} remote-as {{ n.remote_as }}
+ neighbor {{ n.ip }} description {{ n.description }}
+{% endfor %}
+{% for net, m in device.bgp.networks %}
+ network {{ net }} mask {{ m }}
+{% endfor %}
+!
+{% endif %}
+{% for net, m, hop in device.static_routes %}
+ip route {{ net }} {{ m }} {{ hop }}
+{% endfor %}
+{% for name, lines in device.prefix_lists | dictsort if flags.redistribute %}
+{% for l in lines %}
+ip prefix-list {{ name }} {{ l }}
+{% endfor %}
+{% endfor %}
+{% for name, lines in device.route_maps | dictsort if flags.redistribute %}
+route-map {{ name }} {{ lines[0] }}
+{% for l in lines[1:] %}
+{{ l }}
+{% endfor %}
+{% endfor %}
+{% if device.default_gateway %}
+ip default-gateway {{ device.default_gateway }}
+{% endif %}
+!

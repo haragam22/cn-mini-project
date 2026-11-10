@@ -1,0 +1,69 @@
+{% for i in device.interfaces %}
+interface {{ i.name }}
+{% if i.description %}
+ description {{ i.description }}
+{% endif %}
+{% if i.kind == 'sub' %}
+ encapsulation dot1Q {{ i.vlan }}
+{% endif %}
+{% if i.mode == 'access' %}
+ switchport mode access
+ switchport access vlan {{ i.vlan }}
+{% if i.edge_port %}
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+{% endif %}
+{% elif i.mode == 'trunk' %}
+{% if device.model == '3560-24PS' %}
+ switchport trunk encapsulation dot1q
+{% endif %}
+ switchport mode trunk
+ switchport trunk native vlan {{ i.native_vlan }}
+ switchport trunk allowed vlan {{ i.allowed_vlans | join(',') }}
+ switchport nonegotiate
+{% elif i.kind == 'physical' and device.role == 'l3switch' %}
+ no switchport
+{% endif %}
+{% if i.ip %}
+ ip address {{ i.ip }} {{ i.prefix | mask }}
+{% elif i.mode == 'none' %}
+ no ip address
+{% endif %}
+{% if i.kind == 'tunnel' %}
+{% if flags.tunnel_mss %}
+ ip mtu {{ i.ip_mtu }}
+ ip tcp adjust-mss {{ i.tcp_mss }}
+{% endif %}
+ tunnel source {{ i.tunnel_source }}
+ tunnel destination {{ i.tunnel_destination }}
+{% endif %}
+{% if i.ospf %}
+{% if i.ospf.point_to_point %}
+ ip ospf network point-to-point
+{% endif %}
+{% if i.ospf.hello %}
+ ip ospf hello-interval {{ i.ospf.hello }}
+ ip ospf dead-interval {{ i.ospf.dead }}
+{% endif %}
+{% if i.ospf.cost %}
+ ip ospf cost {{ i.ospf.cost }}
+{% endif %}
+{% endif %}
+{% if i.acl_in %}
+ ip access-group {{ i.acl_in }} in
+{% endif %}
+{% if i.acl_out %}
+ ip access-group {{ i.acl_out }} out
+{% endif %}
+{% if flags.qos and i.policy_in %}
+ service-policy input {{ i.policy_in }}
+{% endif %}
+{% if flags.qos and i.policy_out %}
+ service-policy output {{ i.policy_out }}
+{% endif %}
+{% if i.crypto_map %}
+ crypto map {{ i.crypto_map }}
+{% endif %}
+ no shutdown
+!
+{% endfor %}

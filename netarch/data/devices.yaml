@@ -1,0 +1,80 @@
+# Device catalogue constants used by the L2 capacity checks (technical.md §6.3, §9.1).
+# Each constant is a mapping with value / unit / source. P5 extends this file (port names).
+
+access_switch:
+  model: 2960-24TT
+  access_ports:
+    value: 24
+    unit: ports
+    source: "technical.md §9.1: Catalyst 2960-24TT, Fa0/1–24."
+  uplink_ports:
+    value: 2
+    unit: ports
+    source: >-
+      technical.md §9.1: Catalyst 2960-24TT, Gi0/1–2. Both are used as uplinks to the
+      distribution switch (dual uplink).
+  poe_per_port_w:
+    value: 0
+    unit: W
+    source: >-
+      Cisco Catalyst 2960 Series data sheet: the 2960-24TT has no PoE (PoE is only on the
+      -PST/-LC/-PC models); confirmed in docs/QUESTIONS.md (Phase P2 PoE question, 2026-10-24).
+
+distribution_switch:
+  model: 3560-24PS
+  access_ports:
+    value: 24
+    unit: ports
+    source: "technical.md §9.1: Catalyst 3560-24PS, Fa0/1–24 (PoE)."
+  uplink_ports:
+    value: 2
+    unit: ports
+    source: "technical.md §9.1: Catalyst 3560-24PS, Gi0/1–2."
+  poe_standard:
+    value: "802.3af"
+    unit: standard
+    source: >-
+      Cisco Catalyst 3560 Series data sheet: the 3560-24PS has 24 IEEE 802.3af PoE ports;
+      confirmed in docs/QUESTIONS.md (Phase P2 PoE question, 2026-10-24).
+  poe_per_port_w:
+    value: 15.4
+    unit: W
+    source: >-
+      IEEE 802.3af: 15.4 W per port at the PSE (Class 0/3 maximum); 3560-24PS is 802.3af
+      (Cisco Catalyst 3560 Series data sheet; docs/QUESTIONS.md Phase P2).
+
+poe:
+  per_ap_w:
+    value: 30
+    unit: W
+    source: "IEEE 802.3at Class 4: 30 W at the PSE per access point (technical.md §6.3)."
+
+wireless:
+  max_clients_per_ap:
+    value: 40
+    unit: clients
+    source: "technical.md §6.3 AP density design constant (default 40); not a standard value."
+
+# Lab models and their Packet Tracer port names (technical.md §9.1), used by
+# configgen/interface_map.py. Ports are listed in the order they are handed out.
+router:
+  model: "2911"
+  ports: ["GigabitEthernet0/0", "GigabitEthernet0/1", "GigabitEthernet0/2"]
+  source: "technical.md §9.1: Cisco 2911, Gi0/0–Gi0/2."
+lab_ports:
+  "3560-24PS":
+    uplink: ["GigabitEthernet0/1", "GigabitEthernet0/2"]
+    access_prefix: "FastEthernet0/"
+    access_count:
+      value: 24
+      unit: ports
+      source: "technical.md §9.1: Fa0/1–24."
+    source: "technical.md §9.1: Catalyst 3560-24PS, Fa0/1–24 (PoE), Gi0/1–2."
+  "2960-24TT":
+    uplink: ["GigabitEthernet0/1", "GigabitEthernet0/2"]
+    access_prefix: "FastEthernet0/"
+    access_count:
+      value: 24
+      unit: ports
+      source: "technical.md §9.1: Fa0/1–24."
+    source: "technical.md §9.1: Catalyst 2960-24TT, Fa0/1–24, Gi0/1–2."

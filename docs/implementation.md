@@ -88,7 +88,7 @@ Every engine function lands with its tests in the same commit. CI-style local co
 
 ## P0 — Setup and risk spikes · 23–24 Oct
 
-**Status**: todo
+**Status**: manual
 
 **Goal:** prove the three risky external dependencies work **before** writing engine code: Batfish, Packet Tracer command support, Textual on your terminal.
 
@@ -109,9 +109,9 @@ Every engine function lands with its tests in the same commit. CI-style local co
 **Deliverables:** repo pushed; `pt_capabilities.yaml` complete; `optics.yaml` sourced; working Batfish command in README draft; Textual hello app.
 
 **Done when** (gate P0):
-- [ ] `pybatfish` answers `initIssues` on the sample snapshot with **0 errors**, and `ospfSessionCompatibility` shows the session **established**.
+- [x] `pybatfish` answers `initIssues` on the sample snapshot with **0 errors**, and `ospfSessionCompatibility` shows the session **established**.
 - [ ] (manual) Every row in the PT capability matrix has a result (no ☐ left).
-- [ ] Every optics constant has a source citation.
+- [x] Every optics constant has a source citation.
 - [ ] (manual) Textual demo renders tabs and a table in Windows Terminal.
 - [ ] (manual) Repo is public/private as intended and cloneable.
 
@@ -121,7 +121,7 @@ Every engine function lands with its tests in the same commit. CI-style local co
 
 ## P1 — Input layer, models, presets · 25–26 Oct
 
-**Status**: todo
+**Status**: done
 
 **Goal:** every input the tool will ever see is typed, validated, and produces precise errors.
 
@@ -140,16 +140,16 @@ Every engine function lands with its tests in the same commit. CI-style local co
 **Deliverables:** models, errors, 3 presets, render skeleton, tests.
 
 **Done when** (gate P1):
-- [ ] All 3 presets load and validate with **zero** errors.
-- [ ] ≥ 15 invalid-input tests, each asserting the **specific** error class and field (bad CIDR, host bits set, VLAN 1, VLAN 1003, duplicate VLAN, unknown link endpoint, negative distance, copper > 100 m → `PhysicalDistanceViolationError`, VPC overlap → `AddressOverlapError`, dual_homed with one link → `TopologyConstraintError`, …).
-- [ ] An input with 3 separate mistakes reports **all 3**.
-- [ ] `pytest` green.
+- [x] All 3 presets load and validate with **zero** errors.
+- [x] ≥ 15 invalid-input tests, each asserting the **specific** error class and field (bad CIDR, host bits set, VLAN 1, VLAN 1003, duplicate VLAN, unknown link endpoint, negative distance, copper > 100 m → `PhysicalDistanceViolationError`, VPC overlap → `AddressOverlapError`, dual_homed with one link → `TopologyConstraintError`, …).
+- [x] An input with 3 separate mistakes reports **all 3**.
+- [x] `pytest` green.
 
 ---
 
 ## P2 — L1/L2 engines and explain framework · 27–28 Oct
 
-**Status**: todo
+**Status**: done
 
 **Goal:** media, transceiver, topology tier and switching decisions, each a complete Decision record.
 
@@ -163,17 +163,17 @@ Every engine function lands with its tests in the same commit. CI-style local co
 5. `explain/render.py`: finish text and Markdown renderers; spec notes appear where we refine the spec.
 
 **Done when** (gate P2):
-- [ ] Boundary tests pass: 100 / 100.01 / 400 / 400.01 m; 10 km → LR (1.5 dB margin) and 10.01 km → ER; Metro 15 / 22 / 35 km produce ER / ER / ZR + warning; 81 km → `OpticalBudgetExceededError`.
-- [ ] The three Metro worked examples in technical.md §5.3 are reproduced **to 0.01 dB** by tests.
-- [ ] Every decision has a non-empty rationale, ≥ 1 standard, rejected alternatives where alternatives exist, and the input numbers appear in the text (test asserts this).
-- [ ] No OM4 rationale contains the word "attenuation" as the limit cause (test).
-- [ ] `netarch explain --preset campus` (quick temporary script is fine) prints readable decisions for all links.
+- [x] Boundary tests pass: 100 / 100.01 / 400 / 400.01 m; 10 km → LR (1.5 dB margin) and 10.01 km → ER; Metro 15 / 22 / 35 km produce ER / ER / ZR + warning; 81 km → `OpticalBudgetExceededError`.
+- [x] The three Metro worked examples in technical.md §5.3 are reproduced **to 0.01 dB** by tests.
+- [x] Every decision has a non-empty rationale, ≥ 1 standard, rejected alternatives where alternatives exist, and the input numbers appear in the text (test asserts this).
+- [x] No OM4 rationale contains the word "attenuation" as the limit cause (test).
+- [x] `netarch explain --preset campus` (quick temporary script is fine) prints readable decisions for all links.
 
 ---
 
 ## P3 — VLSM subnet engine · 29–31 Oct
 
-**Status**: todo
+**Status**: done (2026-11-10; independent phase-reviewer PASS)
 
 **Goal:** a provably correct bitwise allocator. This is the single most-tested component.
 
@@ -188,18 +188,18 @@ Every engine function lands with its tests in the same commit. CI-style local co
 6. Hypothesis property suite vs the `ipaddress` oracle.
 
 **Done when** (gate P3):
-- [ ] Wildcard tests for **every** prefix 0–32 match `ipaddress` `hostmask`.
-- [ ] Hypothesis: **≥ 1,000 examples** with no overlap, all aligned, all inside root, all usable ≥ needed.
-- [ ] Exhaustion: exact fit passes; +1 address raises with the **correct** shortfall number.
-- [ ] 253 hosts → /24 and 254 → /23 (gateway rule) tested.
-- [ ] For all 3 presets: each site's summary equals its block, and the summary contains no other site's address.
-- [ ] Coverage of `vlsm.py` ≥ 95 %.
+- [x] Wildcard tests for **every** prefix 0–32 match `ipaddress` `hostmask`.
+- [x] Hypothesis: **≥ 1,000 examples** with no overlap, all aligned, all inside root, all usable ≥ needed.
+- [x] Exhaustion: exact fit passes; +1 address raises with the **correct** shortfall number.
+- [x] 253 hosts → /24 and 254 → /23 (gateway rule) tested.
+- [x] For all 3 presets: each site's summary equals its block, and the summary contains no other site's address.
+- [x] Coverage of `vlsm.py` ≥ 95 %.
 
 ---
 
 ## P4 — Routing, VPN, QoS, ACL design · 1–2 Nov
 
-**Status**: todo
+**Status**: done (2026-11-10; independent phase-reviewer PASS)
 
 **Goal:** complete the NetworkPlan: every device, interface, IP, process, tunnel, policy and decision, before any config text exists.
 
@@ -213,16 +213,16 @@ Every engine function lands with its tests in the same commit. CI-style local co
 5. `configgen/interface_map.py`: logical links → PT port names per `devices.yaml`.
 
 **Done when** (gate P4):
-- [ ] `plan.json` for each preset contains: every device with model, every interface with IP/mask, every link with media + optic + ports, routing per device, tunnels (Global), ACLs, QoS (Metro).
-- [ ] Routing decisions: Campus → single-area OSPF, Metro → single-area OSPF + failover, Global → multi-area + eBGP + GRE-over-IPsec, each with rationale and rejected options.
-- [ ] Metro latency decision reproduces technical.md §8.5 (≈ 0.30 ms, 4.7 ms queuing budget).
-- [ ] No port is used twice on any device (test); every port exists on its model (test).
+- [x] `plan.json` for each preset contains: every device with model, every interface with IP/mask, every link with media + optic + ports, routing per device, tunnels (Global), ACLs, QoS (Metro).
+- [x] Routing decisions: Campus → single-area OSPF, Metro → single-area OSPF + failover, Global → multi-area + eBGP + GRE-over-IPsec, each with rationale and rejected options.
+- [x] Metro latency decision reproduces technical.md §8.5 (≈ 0.30 ms, 4.7 ms queuing budget).
+- [x] No port is used twice on any device (test); every port exists on its model (test).
 
 ---
 
 ## P5 — Config generator · 2–4 Nov
 
-**Status**: todo
+**Status**: manual (2026-11-10; automated items verified, PT paste spot check is yours)
 
 **Goal:** copy-paste-ready IOS for every device, in both dialects.
 
@@ -235,16 +235,16 @@ Every engine function lands with its tests in the same commit. CI-style local co
 4. Golden-file (syrupy) snapshots for 3 presets × 2 dialects.
 
 **Done when** (gate P5):
-- [ ] `netarch export` (temporary script fine) writes all artefacts for all 3 presets.
+- [x] `netarch export` (temporary script fine) writes all artefacts for all 3 presets.
 - [ ] (manual) Spot check: one device per role pasted into PT with **zero** "% Invalid input" lines.
-- [ ] No config contains `allowed vlan all`, native VLAN 1, a subnet mask inside an OSPF `network` statement, or a clear-text `enable password` (tests).
-- [ ] Golden snapshots committed; regenerating produces no diff.
+- [x] No config contains `allowed vlan all`, native VLAN 1, a subnet mask inside an OSPF `network` statement, or a clear-text `enable password` (tests).
+- [x] Golden snapshots committed; regenerating produces no diff.
 
 ---
 
 ## P6 — Verification layer · 4–5 Nov
 
-**Status**: todo
+**Status**: todo (2026-11-10; self-check + mutations verified; Batfish searchFilters/traceroutes/failover fork not written, never run — Docker was off)
 
 **Goal:** the tool proves its own output is correct.
 
@@ -257,16 +257,16 @@ Every engine function lands with its tests in the same commit. CI-style local co
 4. Mark Batfish tests `@pytest.mark.batfish`.
 
 **Done when** (gate P6):
-- [ ] Self-check: **all PASS** on 3 presets × 2 dialects.
-- [ ] Mutation test: deliberately corrupt a config (duplicate IP, missing VLAN on trunk, wrong wildcard) → self-check **FAILS** with the right check id each time.
+- [x] Self-check: **all PASS** on 3 presets × 2 dialects.
+- [x] Mutation test: deliberately corrupt a config (duplicate IP, missing VLAN on trunk, wrong wildcard) → self-check **FAILS** with the right check id each time.
 - [ ] Batfish on all 3 presets (`full`): 0 parse errors, 0 undefined refs, 0 duplicate IPs, all OSPF/BGP/IPsec sessions up, summaries present, policy traceroutes match the matrix, Metro failover path moves via Colo.
-- [ ] With Docker stopped: `verify` completes, reports Batfish skipped, exit code reflects only the self-check.
+- [x] With Docker stopped: `verify` completes, reports Batfish skipped, exit code reflects only the self-check.
 
 ---
 
 ## P7 — CLI and TUI · 5–7 Nov
 
-**Status**: todo
+**Status**: manual (2026-11-10; automated items verified, Windows Terminal 120 × 35 check is yours)
 
 **Goal:** a polished, interactive terminal app in which the whole workflow runs without touching code.
 
@@ -280,10 +280,10 @@ Every engine function lands with its tests in the same commit. CI-style local co
 5. Stylesheet: consistent colours; PASS/FAIL always written as words, not just colour.
 
 **Done when** (gate P7):
-- [ ] From `netarch` with no args: pick each preset → view decisions → verify → export `.txt` files → **without leaving the TUI**.
-- [ ] Load a broken custom JSON: errors appear beside the right fields; the app doesn't crash.
-- [ ] Distance what-if 95 → 105 → 450 → 12,000 → 36,000 m updates the decision live.
-- [ ] Every CLI command works and returns the documented exit code (tests via Typer's `CliRunner`).
+- [x] From `netarch` with no args: pick each preset → view decisions → verify → export `.txt` files → **without leaving the TUI**.
+- [x] Load a broken custom JSON: errors appear beside the right fields; the app doesn't crash.
+- [x] Distance what-if 95 → 105 → 450 → 12,000 → 36,000 m updates the decision live.
+- [x] Every CLI command works and returns the documented exit code (tests via Typer's `CliRunner`).
 - [ ] (manual) Runs in Windows Terminal at 120 × 35 without clipped panels.
 
 ---
@@ -306,6 +306,21 @@ Every engine function lands with its tests in the same commit. CI-style local co
 - [ ] (manual) 3 `.pkt` files + 3 exported config sets committed under `verification/` (**spec deliverable**).
 - [ ] (manual) Every checklist command for Campus and Metro produces the expected result; Global's PT subset passes and the rest is covered by the Batfish report.
 - [ ] (manual) `ai_audit_log.md`: ≥ 2 complete entries (target 4), each with prompt, buggy code, diagnosis, **PT packet-flow evidence**, fix and regression test.
+
+---
+
+## P8.5 — User simulation (≥ 1,000 users) and security hardening · 9 Nov
+
+**Status**: todo
+
+Built with the `user-sim` skill (workflow module added 2026-10-24). Simulate ≥ 1,000 users against the finished product; failures become reproducing tests and fixes; then clear the security backlog and run the security-breaker on the full project.
+
+**Done when**:
+- [ ] `sim/` harness simulates ≥ 1,000 seeded users with the documented input mix (`sim/users.md`).
+- [ ] Pass bar met (user-sim skill reference; overrides in decisions.md): 0 crashes/hangs/unhandled exceptions, valid-input error rate < 1 %, 100 % of invalid inputs rejected with the documented error, p95 within the target stated in decisions.md.
+- [ ] Every failure cluster has a reproducing test and a root-cause fix; `docs/user-sim-report.md` written.
+- [ ] `docs/security/backlog.md` cleared (fixed with tests, or risk accepted by the user).
+- [ ] security-breaker full-project run: 0 open critical/high findings.
 
 ---
 

@@ -1,4 +1,7 @@
 .venv/
+*.egg-info/
+.ruff_cache/
+.hypothesis/
 output/
 secrets.txt
 __pycache__/

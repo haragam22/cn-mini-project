@@ -1,20 +1,24 @@
 # Code flow
-> **Planned — no code yet.** Written from technical.md §2–3 and §10. Update each section as phases land; replace planned paths with real `file:function` references.
+> All pipeline stages are implemented (P1–P7). Paths below are real `file:function` references.
 
 ## Entry points
+- `netarch = netarch.cli:app`. No args → Textual TUI (`tui/app.py:run_tui`). Commands (`cli.py`): `presets`, `validate`, `design [--json]`, `explain [--id] [--domain] [--markdown]`, `plan`, `export --out --zip --dialect pt|full --only`, `verify [--dialect] [--no-batfish] [--batfish-host]`, `checklist`; global `--debug`. Each loads a preset or `--input` JSON, runs `engines/__init__.py:design`, prints with Rich. Errors → Rich panel (field, value, rule, hint). Exit 0 ok · 1 verification failed · 2 input invalid · 3 design constraint error.
 - `netarch/cli.py` — Typer app. No args → launches the Textual TUI (`netarch/tui/app.py`). Subcommands: `presets`, `validate`, `design`, `explain`, `plan`, `export`, `verify`, `checklist` (technical.md §10.1).
 - Exit codes: 0 ok · 1 verification failed · 2 input invalid · 3 design constraint error.
 
 ## Pipeline (each stage a pure function: plan in, plan out)
-1. **Input** — preset (`data/presets/*.json`) or custom JSON → validated by `models/requirements.py` (pydantic). All errors collected and reported with field/value/rule/hint (`errors.py`).
-2. **L1** — `engines/optics.py` (loss/power budget math) + `engines/l1_media.py` (media + transceiver per link).
-3. **Topology & L2** — `engines/topology.py` (tier), `engines/l2_switching.py` (VLANs, trunks, native 999, RSTP root, capacity checks).
-4. **Addressing** — `engines/vlsm.py` (bitwise hierarchical allocator, summarisation, efficiency).
-5. **L3+** — `engines/routing.py`, `engines/vpn.py`, `engines/qos.py`, `engines/security.py`; `configgen/interface_map.py` maps links to real port names.
-6. **Plan** — `models/plan.py` NetworkPlan + `models/decisions.py` Decision records (rationale, standards, rejected alternatives, counterfactuals).
-7. **Config generation** — `configgen/render.py` + Jinja templates, `full` and `pt` dialects.
-8. **Verification** — `verify/selfcheck.py` (11 invariants, always), `verify/batfish_runner.py` (optional, Docker), `verify/checklist.py` (Packet Tracer steps).
-9. **Export** — `export/writer.py`: per-device `.txt`, ZIP, `rationale.md`, `ip-plan.csv`, `plan.json`, `topology.mmd`, `secrets.txt`.
+1. **Input** — preset (`netarch/presets/{campus,metro,global}.json`, `models/requirements.py:load_preset`) or custom JSON (`load_requirements_file`) → `load_requirements` → `collect_errors`: pydantic field rules, then `_cross_checks` (site ids, VLAN uniqueness, link endpoints, copper > 100 m, RFC 1918/overlap, dual_homed) on the raw input. One error raises its own class; several raise `InputValidationError` with `.errors`. Every error carries field/value/rule_id/message/hint (`errors.py`).
+2. **L1** — `engines/l1_media.py:run(plan, min_margin_db=None)`: per link `_pick_media` (MEDIA.R1/R2/R3, X1 inter-building → OM4, `requested_media` handling, E1 copper > 100 m → `PhysicalDistanceViolationError`) → for OS2 `engines/optics.py:select_os2_optic` (loss = L·α(λ) + connectors + splices, margin = CIL − loss, cheapest optic with reach and margin ≥ min margin, fallback margin ≥ 0 with warning, else `OpticalBudgetExceededError`) → two Decisions per link (`media`, `transceiver`, ids `L1-nn`) + `PlanLink(media, optic)`. Then one MEDIA.X2 access-cabling Decision per site with `access_run_max_m` (> 90 m warning, > 100 m E1). Constants: `media.yaml`, `optics.yaml`.
+3. **Topology & L2** — `engines/topology.py:run`: `select_tier(blocks, endpoints)` (TOP.R1/R2/R3, thresholds in `topology.yaml`), link-count math (full mesh n(n−1)/2, hub n−1, core n), one `TOP-01` Decision. `engines/l2_switching.py:run(plan, poe_budget_w=None)`: per site `PlanSegment`s + four Decisions (`L2.VLAN` VLAN set + native 999, `L2.TRUNK` exact allowed list / native 999 / nonegotiate, `L2.RSTP` rapid-pvst root primary on the distribution switch, `L2.CAP` access switches = ceil((wired + APs) / (26 − 2)), PoE = APs × 30 W, clients/AP ≤ 40). `check_access_ports` / `check_poe` raise `CapacityError`. Constants: `devices.yaml`, `topology.yaml`. Each engine appends its decision warnings to `plan.warnings` as `"<id>: <warning>"`.
+4. **Addressing** — `engines/vlsm.py:run(plan)` (in `engines/__init__.py:design`, after L2): §7.1 primitives (integer bit math) → `segment_prefix` per segment (gateway rule, exact growth) → `infra_items` (link/tunnel p2p + one loopback per site; /31 or /30 from `choose_p2p_prefix` → `engines/ptcaps.py:pt_result`) → `allocate` (site blocks + infra block via `place`: size DESC, key ASC, lowest aligned free spot skipping reserved; then segments inside each block) → `summarise` / `summary_is_exact`, `free_blocks`, metrics → `NetworkPlan.addressing` (`AddressingPlan`: site blocks, infra block, org summary, `Subnet` rows with mask/wildcard/gateway/first/last/broadcast/utilisation, loopbacks, free list), `PlanSegment.subnet/gateway`, `PlanLink.subnet`, Decisions `L3-nn` (ADDR.SIZE/P2P/SITE/INFRA/EFF). Too little space → `AddressSpaceExhaustedError` (ADDR.E1, CLI exit 3).
+5. **Lab mapping** — `configgen/interface_map.py:build`: devices (`Device` with `Interface`s), PT port names from `data/devices.yaml` (`_Ports.take`, `CapacityError` LAB.PORTS when a model runs out), `Cable` list, `EndHost` per segment, `PlanLink.ports`; Metro `evpl-carrier`, Global `inet-sw` + `cloud-vgw` (`_internet`); Decision `TOP-nn` LAB.MAP.
+6. **VPN** — `engines/vpn.py:run`: one `Tunnel<i>` pair per `tunnel:` row of the P3 infra block, `Crypto` (crypto map + per-peer GRE ACL, `psk:` refs), `VpnTunnel`s; `crypto_suite(dialect)`; Decisions VPN-01 (RT.R4) / VPN-02.
+7. **Routing** — `engines/routing.py:run`: `is_multi_area`, `site_areas`, per L3 device `OspfProcess` (router-ID = Loopback0, ref bw 10000, networks with wildcards, active = transit, area ranges), `OspfIf` (p2p, Metro timers/costs), hub/cloud `BgpProcess` + Null0 + prefix-list/route-map; `plan.routing` summary; Decisions RT-nn (R1/R2, OSPF, FAILOVER, AREA, R3).
+8. **QoS** — `engines/qos.py:run` (only with `latency_target_ms`): `latency_ms` §8.5 terms, `QosPolicy` WAN-EDGE / MARK-TRADING attached to router interfaces; Decision QOS-01.
+9. **Security** — `engines/security.py:run`: `AclPolicy` (WIFI-IN, TRADING-PROTECT, IOT-IN, CLOUD-OUT, VTY-MGMT) with `AclEntry`s ending in an explicit deny, attached via `acl_in`/`acl_out`/`vty_acl`; Decisions SEC-nn.
+10. **Config generation** — `configgen/render.py:render_all/render_device`: Jinja `templates/{router,l3switch,l2switch}.j2` + `partials/*.j2`; `dialect_flags` (PT matrix) → `! NETARCH-PT-COMPAT:` lines; `make_secrets`.
+11. **Verification** — `verify/selfcheck.py:run_selfcheck` (C1–C11 → `CheckResult`), `verify/batfish_runner.py:run_batfish` (3 s probe, snapshot `configs/` + `hosts/`, questions), `verify/checklist.py:build_checklist`.
+12. **Export** — `export/writer.py:write_all`: `configs/<host>.txt`, `rationale.md`, `ip-plan.csv` (formula-safe), `plan.json`, `pt-checklist.md`, `topology.mmd`, `secrets.txt`, optional ZIP (no secrets inside).
 
 ```
 preset/JSON → validate → L1 → topology/L2 → VLSM → routing/VPN/QoS/ACL → NetworkPlan+Decisions
@@ -23,7 +27,7 @@ preset/JSON → validate → L1 → topology/L2 → VLSM → routing/VPN/QoS/ACL
 ```
 
 ## Explainability
-`explain/builder.py` builds Decision records inside each engine; `explain/render.py` turns them into text/Markdown for CLI, TUI and `rationale.md`.
+`explain/builder.py` (`make_decision`, `decision_id`, `rejected`) builds Decision records inside each engine and fills `rationale` via `render_rationale`. `explain/render.py`: `WHY[(domain, rule_id)]` holds one fixed engineering sentence per rule (no measured values); `render_rationale` (paragraph: choice + inputs, why, math, rejected, counterfactual, warnings, standards), `render_text` (terminal block ≤ 100 cols, with `Spec note:`), `render_markdown`, `render_report(decisions, "text"|"markdown")` for CLI, TUI and `rationale.md`. Standards strings come from `data/standards.yaml`.
 
 ## External services
 - Batfish (Docker, localhost) via pybatfish — optional; 3 s connect timeout, graceful skip in the app.

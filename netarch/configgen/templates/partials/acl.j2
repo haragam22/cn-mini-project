@@ -1,0 +1,8 @@
+{% for a in acls %}
+ip access-list {{ a.kind }} {{ a.name }}
+{% for e in a.entries %}
+ {{ e.action }} {{ e.text }}{% if e.log and flags.acl_log %} log{% endif %}
+
+{% endfor %}
+!
+{% endfor %}

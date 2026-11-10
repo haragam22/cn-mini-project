@@ -1,0 +1,10 @@
+hostname {{ device.hostname }}
+service password-encryption
+no ip domain-lookup
+banner motd ^Authorized access only - {{ device.hostname }}^
+enable secret {{ secrets.enable }}
+username admin privilege 15 secret {{ secrets.admin }}
+ip domain-name netarch.lab
+crypto key generate rsa general-keys modulus 2048
+ip ssh version 2
+!

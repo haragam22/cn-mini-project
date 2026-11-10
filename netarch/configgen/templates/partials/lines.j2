@@ -1,0 +1,11 @@
+line con 0
+ logging synchronous
+ login local
+line vty 0 15
+ login local
+ transport input ssh
+{% if device.vty_acl %}
+ access-class {{ device.vty_acl }} in
+{% endif %}
+!
+end

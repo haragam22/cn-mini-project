@@ -1,0 +1,22 @@
+{% if device.crypto %}
+crypto isakmp policy 10
+ encr {{ flags.crypto.encr }}
+ hash {{ flags.crypto.hash }}
+ authentication pre-share
+ group {{ flags.crypto.group }}
+{% for p in device.crypto.peers %}
+crypto isakmp key {{ secrets[p.psk_ref] }} address {{ p.peer_ip }}
+{% endfor %}
+crypto ipsec transform-set TS {{ flags.crypto.transform }}
+{% for p in device.crypto.peers %}
+ip access-list extended {{ p.acl }}
+ {{ p.acl_entry }}
+{% endfor %}
+{% for p in device.crypto.peers %}
+crypto map {{ device.crypto.map_name }} {{ p.seq }} ipsec-isakmp
+ set peer {{ p.peer_ip }}
+ set transform-set TS
+ match address {{ p.acl }}
+{% endfor %}
+!
+{% endif %}
